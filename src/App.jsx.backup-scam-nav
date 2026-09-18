@@ -1,0 +1,1211 @@
+import { useMemo, useState } from "react";
+import {
+  ArrowRight, Building2, CheckCircle2, ChevronDown, Download, Home, Mail,
+  MapPin, Menu, MessageCircle, Phone, Search, ShieldCheck, Smartphone,
+  Users, X, Heart, SlidersHorizontal, CalendarDays, Star, Zap, BarChart3,
+  FileText, ChevronLeft, ChevronRight
+} from "lucide-react";
+import { FaWhatsapp, FaFacebookF, FaInstagram, FaXTwitter, FaGithub, FaTiktok } from "react-icons/fa6";
+import "./App.css";
+
+const PHONE = "0708209070";
+const EMAIL = "dicksonsang434@gmail.com";
+const WHATSAPP = "https://wa.me/254708209070";
+const APP_URL = "https://github.com/g4-star/Jumaa-web/releases/download/v1.0.2/JUMAA-Android.apk";
+
+const properties = [
+  { id:"greenview", name:"GreenView Apartments", county:"Nakuru", area:"Nakuru Town", type:"Apartment", house:"1 Bedroom", price:12000, beds:1, image:"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85", verified:true, boosted:true, likes:128, description:"Modern apartments with convenient access to shops, transport and everyday services." },
+  { id:"jumaa-heights", name:"JUMAA Heights", county:"Nairobi", area:"Kasarani", type:"Apartment", house:"2 Bedroom", price:15000, beds:2, image:"https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85", verified:true, boosted:true, likes:96, description:"Comfortable urban homes in Kasarani with practical layouts and easy access to the city." },
+  { id:"palm-residence", name:"Palm Residence", county:"Bomet", area:"Bomet Town", type:"Apartment", house:"1 Bedroom", price:10000, beds:1, image:"https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85", verified:true, boosted:false, likes:84, description:"Quiet, affordable homes close to Bomet town amenities." },
+  { id:"milimani", name:"Milimani Heights", county:"Nakuru", area:"Milimani", type:"Apartment", house:"2 Bedroom", price:18000, beds:2, image:"https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=77", verified:true, boosted:false, likes:73, description:"Spacious homes in a popular Nakuru neighbourhood." },
+  { id:"kasarani-gardens", name:"Kasarani Gardens", county:"Nairobi", area:"Kasarani", type:"Apartment", house:"1 Bedroom", price:16000, beds:1, image:"https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85", verified:true, boosted:false, likes:61, description:"Well-positioned apartments for people who want city access without the central-city rush." },
+  { id:"lakeview", name:"Lakeview Apartments", county:"Kisumu", area:"Milimani", type:"Apartment", house:"2 Bedroom", price:14000, beds:2, image:"https://images.unsplash.com/photo-1600607687920-4ae2a09cf159?auto=format&fit=crop&w=1200&q=85", verified:true, boosted:false, likes:55, description:"A comfortable Kisumu option for tenants looking for space and convenience." },
+  { id:"riverside", name:"Riverside Residences", county:"Nairobi", area:"Westlands", type:"Apartment", house:"3 Bedroom", price:22000, beds:3, image:"https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1200&q=85", verified:true, boosted:false, likes:49, description:"Premium residences in Westlands for families and professionals." },
+  { id:"green-park", name:"Green Park Homes", county:"Kericho", area:"Town", type:"Apartment", house:"1 Bedroom", price:13000, beds:1, image:"https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=82", verified:false, boosted:false, likes:38, description:"Affordable homes near Kericho town." },
+];
+
+const formatMoney = n => `KSh ${n.toLocaleString()}`;
+
+const JUMAA_QUIZZES = {
+  renting: [
+    {
+      question: "What should you verify before paying a rental deposit?",
+      options: ["Property and landlord details", "The wall colour", "Nothing", "Only the furniture"],
+      answer: 0,
+      explanation: "Always verify the property, landlord and rental terms before making a payment."
+    },
+    {
+      question: "What is a good first step when looking for a home?",
+      options: ["Choose a random apartment", "Set your location and budget", "Pay before viewing", "Ignore availability"],
+      answer: 1,
+      explanation: "Knowing your preferred location and budget makes your search easier."
+    },
+    {
+      question: "Why is checking apartment availability important?",
+      options: ["It tells you whether a unit can actually be rented", "It changes the website colour", "It increases rent", "It is not important"],
+      answer: 0,
+      explanation: "Availability helps you avoid wasting time on units that are already occupied."
+    },
+    {
+      question: "What should you do before signing a rental agreement?",
+      options: ["Read and understand the terms", "Skip the agreement", "Pay without checking", "Give away your password"],
+      answer: 0,
+      explanation: "Always read and understand the rental agreement before signing."
+    },
+    {
+      question: "What can JUMAA help tenants do?",
+      options: ["Find homes and connect with property owners", "Guarantee every rental", "Replace government documents", "Provide free houses"],
+      answer: 0,
+      explanation: "JUMAA helps people discover properties and connect with property owners."
+    }
+  ],
+
+  safety: [
+    {
+      question: "Someone asks you to pay before showing you the property. What is safest?",
+      options: ["Pay immediately", "Verify the property and owner first", "Send your password", "Ignore verification"],
+      answer: 1,
+      explanation: "Verify the property and the person offering it before sending money."
+    },
+    {
+      question: "Which information should you never share with a stranger?",
+      options: ["Preferred location", "Rental budget", "Banking PIN or password", "Preferred house type"],
+      answer: 2,
+      explanation: "Never share sensitive credentials such as banking PINs or passwords."
+    },
+    {
+      question: "What is a warning sign in a rental deal?",
+      options: ["A property viewing", "Clear rental terms", "Pressure to pay immediately", "A proper agreement"],
+      answer: 2,
+      explanation: "Pressure to pay immediately without proper verification is a major warning sign."
+    },
+    {
+      question: "What should you do if a listing looks suspicious?",
+      options: ["Send money", "Verify it and report concerns", "Share your PIN", "Ignore everything"],
+      answer: 1,
+      explanation: "Verification and reporting suspicious activity can help protect you."
+    },
+    {
+      question: "Which is safer when communicating about a rental?",
+      options: ["Keep records of important communication", "Delete every message", "Send passwords", "Avoid asking questions"],
+      answer: 0,
+      explanation: "Keeping records can be useful when reviewing rental details."
+    }
+  ],
+
+  jumaa: [
+    {
+      question: "What does JUMAA help people discover?",
+      options: ["Homes and rental properties", "Airline tickets", "Cars only", "Restaurant recipes"],
+      answer: 0,
+      explanation: "JUMAA is focused on helping people discover homes and rental properties."
+    },
+    {
+      question: "What can property owners do on JUMAA?",
+      options: ["List their properties", "Create passports", "Issue bank cards", "Replace government services"],
+      answer: 0,
+      explanation: "Property owners can use JUMAA to promote and manage their property listings."
+    },
+    {
+      question: "What does a boosted property receive?",
+      options: ["Higher visibility", "Free rent for tenants", "Automatic ownership", "A government licence"],
+      answer: 0,
+      explanation: "Boosting gives a property higher visibility in the marketplace."
+    },
+    {
+      question: "Who pays JUMAA's owner subscription?",
+      options: ["The tenant", "The property owner", "Every visitor", "Nobody"],
+      answer: 1,
+      explanation: "JUMAA's owner subscription is designed for property owners; tenants do not pay the owner subscription."
+    },
+    {
+      question: "Where can users browse available homes?",
+      options: ["The JUMAA property marketplace", "Only WhatsApp", "Only email", "Nowhere"],
+      answer: 0,
+      explanation: "Users can browse properties through JUMAA's public property marketplace."
+    }
+  ],
+
+  cybersecurity: [
+    {
+      question: "Which password is strongest?",
+      options: ["12345678", "password", "Jumaa2026", "A long unique passphrase with symbols"],
+      answer: 3,
+      explanation: "Long, unique passwords or passphrases are much harder to guess."
+    },
+    {
+      question: "What should you do with a suspicious link?",
+      options: ["Click immediately", "Verify it before opening", "Send it to everyone", "Enter your password"],
+      answer: 1,
+      explanation: "Verify suspicious links before opening them."
+    },
+    {
+      question: "What does phishing usually try to steal?",
+      options: ["Credentials or sensitive information", "House furniture", "Internet speed", "Screen brightness"],
+      answer: 0,
+      explanation: "Phishing commonly attempts to trick users into revealing sensitive information."
+    },
+    {
+      question: "What is two-factor authentication?",
+      options: ["Two usernames", "An additional verification step", "Two browsers", "Two passwords written publicly"],
+      answer: 1,
+      explanation: "2FA adds another verification step beyond the password."
+    },
+    {
+      question: "Should you share your banking PIN with someone claiming to be support?",
+      options: ["Yes", "Only at night", "No", "Only through WhatsApp"],
+      answer: 2,
+      explanation: "Never share your banking PIN or other sensitive authentication credentials."
+    }
+  ]
+};
+
+function JumaaAssistant() {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
+    {
+      from: "bot",
+      text: "Hi 👋 I'm the JUMAA Assistant. I can help you find a home, understand JUMAA, check pricing, or take a quiz."
+    }
+  ]);
+  const [quiz, setQuiz] = useState(null);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [answered, setAnswered] = useState(false);
+  const [selected, setSelected] = useState(null);
+
+  const addMessage = (text, from = "bot") => {
+    setMessages(prev => [...prev, { from, text }]);
+  };
+
+  const startQuiz = type => {
+    setMessages([
+      {
+        from: "bot",
+        text: `🧠 Starting the ${type === "jumaa" ? "JUMAA Knowledge" : type === "safety" ? "Rental Safety" : type === "cybersecurity" ? "Cybersecurity" : "Renting"} quiz!`
+      }
+    ]);
+    setQuiz(JUMAA_QUIZZES[type]);
+    setQuizIndex(0);
+    setScore(0);
+    setAnswered(false);
+    setSelected(null);
+  };
+
+  const answerQuiz = index => {
+    if (answered) return;
+    setSelected(index);
+    setAnswered(true);
+
+    if (index === quiz[quizIndex].answer) {
+      setScore(prev => prev + 1);
+    }
+  };
+
+  const nextQuestion = () => {
+    if (quizIndex < quiz.length - 1) {
+      setQuizIndex(prev => prev + 1);
+      setAnswered(false);
+      setSelected(null);
+      return;
+    }
+
+    const finalScore = score + (selected === quiz[quizIndex].answer ? 1 : 0);
+
+    setMessages([
+      {
+        from: "bot",
+        text: `🎉 Quiz complete! You scored ${finalScore}/${quiz.length} (${Math.round(finalScore / quiz.length * 100)}%).`
+      }
+    ]);
+
+    setQuiz(null);
+    setAnswered(false);
+    setSelected(null);
+  };
+
+  const handleQuestion = () => {
+    const text = input.trim();
+
+    if (!text) return;
+
+    const question = text.toLowerCase();
+
+    setMessages(prev => [...prev, { from: "user", text }]);
+    setInput("");
+
+    setTimeout(() => {
+      if (question.includes("quiz") || question.includes("test") || question.includes("question")) {
+        addMessage("Absolutely 🧠 Choose a quiz below.");
+        return;
+      }
+
+      if (
+        question.includes("price") ||
+        question.includes("pricing") ||
+        question.includes("cost") ||
+        question.includes("subscription")
+      ) {
+        addMessage("JUMAA pricing is for property owners. Tenants do not pay the owner subscription. Open the pricing page to see the available plans.");
+        return;
+      }
+
+      if (
+        question.includes("apartment") ||
+        question.includes("house") ||
+        question.includes("home") ||
+        question.includes("rent") ||
+        question.includes("property")
+      ) {
+        addMessage("JUMAA helps you discover available rental properties. You can browse apartments, compare listings and view property details.");
+        return;
+      }
+
+      if (
+        question.includes("owner") ||
+        question.includes("landlord") ||
+        question.includes("list")
+      ) {
+        addMessage("Property owners can list their properties, manage listings and increase visibility through boosting.");
+        return;
+      }
+
+      if (
+        question.includes("boost") ||
+        question.includes("advert")
+      ) {
+        addMessage("🚀 Boosting gives a property higher marketplace visibility during its active boost period.");
+        return;
+      }
+
+      if (
+        question.includes("how does jumaa work") ||
+        question.includes("what is jumaa") ||
+        question.includes("how jumaa works")
+      ) {
+        addMessage("JUMAA connects people looking for homes with property owners. Users can discover properties while owners can promote and manage their listings.");
+        return;
+      }
+
+      if (
+        question.includes("contact") ||
+        question.includes("support") ||
+        question.includes("whatsapp")
+      ) {
+        addMessage("You can contact the JUMAA team through WhatsApp or the Contact page.");
+        return;
+      }
+
+      addMessage("I can help with 🏠 apartments, 💰 pricing, 🏢 property owners, 🚀 boosting, 🛡️ rental safety, or 🧠 quizzes. Try asking me something about JUMAA.");
+    }, 300);
+  };
+
+  const resetAssistant = () => {
+    setQuiz(null);
+    setQuizIndex(0);
+    setScore(0);
+    setAnswered(false);
+    setSelected(null);
+    setMessages([
+      {
+        from: "bot",
+        text: "Hi 👋 I'm the JUMAA Assistant. What would you like to know?"
+      }
+    ]);
+  };
+
+  return (
+    <>
+      {open && (
+        <div className="jumaa-chatbot">
+          <div className="jumaa-chat-header">
+            <div className="jumaa-chat-title">
+              <div className="jumaa-bot-icon">🤖</div>
+              <div>
+                <strong>JUMAA Assistant</strong>
+                <span><i /> Online</span>
+              </div>
+            </div>
+
+            <button onClick={() => setOpen(false)} aria-label="Close assistant">
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="jumaa-chat-body">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`jumaa-message ${message.from === "user" ? "user" : "bot"}`}
+              >
+                {message.text}
+              </div>
+            ))}
+
+            {!quiz && (
+              <div className="jumaa-quick-actions">
+                <a href="/properties">🔎 Find an Apartment</a>
+                <a href="/billing">💰 Pricing</a>
+                <a href="/owners">🏢 Property Owners</a>
+                <button onClick={() => addMessage("Take a Quiz")}>🧠 Take a Quiz</button>
+              </div>
+            )}
+
+            {!quiz && messages[messages.length - 1]?.text === "Take a Quiz" && (
+              <div className="jumaa-quiz-picker">
+                <strong>Choose your quiz:</strong>
+
+                <button onClick={() => startQuiz("renting")}>🏠 Renting</button>
+                <button onClick={() => startQuiz("safety")}>🛡️ Rental Safety</button>
+                <button onClick={() => startQuiz("cybersecurity")}>🔐 Cybersecurity</button>
+                <button onClick={() => startQuiz("jumaa")}>🌍 JUMAA Knowledge</button>
+              </div>
+            )}
+
+            {quiz && (
+              <div className="jumaa-quiz">
+                <div className="quiz-progress">
+                  Question {quizIndex + 1} / {quiz.length}
+                </div>
+
+                <h4>{quiz[quizIndex].question}</h4>
+
+                <div className="quiz-options">
+                  {quiz[quizIndex].options.map((option, index) => {
+                    let className = "";
+
+                    if (answered) {
+                      if (index === quiz[quizIndex].answer) {
+                        className = "correct";
+                      } else if (index === selected) {
+                        className = "wrong";
+                      }
+                    }
+
+                    return (
+                      <button
+                        key={option}
+                        className={className}
+                        disabled={answered}
+                        onClick={() => answerQuiz(index)}
+                      >
+                        <span>{String.fromCharCode(65 + index)}</span>
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {answered && (
+                  <div className="quiz-result">
+                    <strong>
+                      {selected === quiz[quizIndex].answer ? "✅ Correct!" : "❌ Not quite!"}
+                    </strong>
+
+                    <p>{quiz[quizIndex].explanation}</p>
+
+                    <button onClick={nextQuestion}>
+                      {quizIndex === quiz.length - 1 ? "See Result" : "Next Question →"}
+                    </button>
+                  </div>
+                )}
+
+                <div className="quiz-score">
+                  Score: {score}/{quiz.length}
+                </div>
+              </div>
+            )}
+
+            {!quiz && messages.length > 1 && (
+              <button className="jumaa-reset-chat" onClick={resetAssistant}>
+                ↻ Start again
+              </button>
+            )}
+          </div>
+
+          <div className="jumaa-chat-input">
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter") handleQuestion();
+              }}
+              placeholder="Ask JUMAA anything..."
+            />
+
+            <button onClick={handleQuestion} aria-label="Send message">
+              <ArrowRight size={17} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <button
+        className={`jumaa-chat-float ${open ? "active" : ""}`}
+        onClick={() => setOpen(prev => !prev)}
+        aria-label="Open JUMAA Assistant"
+      >
+        {open ? <X size={23} /> : "🤖"}
+      </button>
+    </>
+  );
+}
+
+
+function Layout({ children }) {
+  const [menu, setMenu] = useState(false);
+  const close = () => setMenu(false);
+  return <div className="site">
+    <header className="navbar">
+      <a href="/" className="brand" onClick={close}><span className="brand-mark"><Home size={20}/></span><span>JUMAA</span></a>
+      <nav className={menu ? "nav-links open" : "nav-links"}>
+        <a href="/properties" onClick={close}>Find Homes</a>
+        <a href="/owners" onClick={close}>For Owners</a>
+        <a href="/how-it-works" onClick={close}>How It Works</a>
+        <a href="/billing" onClick={close}>Pricing</a>
+        <a href="/contact" onClick={close}>Contact</a>
+        <a className="nav-download" href={APP_URL} download onClick={close}><Download size={16}/> Get App</a>
+      </nav>
+      <button className="menu-button" aria-label="Menu" onClick={()=>setMenu(!menu)}>{menu ? <X/>:<Menu/>}</button>
+    </header>
+    {children}
+    <footer>
+      <div className="footer-main">
+        <div className="footer-brand"><a href="/" className="brand"><span className="brand-mark"><Home size={19}/></span>JUMAA</a><p>Making it easier to find, list and connect around homes.</p><div className="socials"><a href={WHATSAPP} target="_blank" rel="noreferrer"><FaWhatsapp/></a><a href="https://facebook.com/" target="_blank" rel="noreferrer"><FaFacebookF/></a><a href="https://instagram.com/" target="_blank" rel="noreferrer"><FaInstagram/></a><a href="https://x.com/" target="_blank" rel="noreferrer"><FaXTwitter/></a><a href="https://github.com/g4-star/Jumaa-web" target="_blank" rel="noreferrer"><FaGithub/></a><a href={`mailto:${EMAIL}`}><Mail/></a></div></div>
+        <div className="footer-column"><h4>Explore</h4><a href="/properties">Find Homes</a><a href="/how-it-works">How It Works</a><a href="/owners">For Owners</a><a href="/billing">Pricing</a><a href="/report-scam">🚨 Report a Scam</a></div>
+        <div className="footer-column"><h4>Company</h4><a href="/about">About JUMAA</a><a href="/faq">FAQ</a><a href="/contact">Contact</a><a href={APP_URL} download>Download App</a></div>
+        <div className="footer-column"><h4>Contact</h4><a href={`tel:+254${PHONE.slice(1)}`}>{PHONE}</a><a href={`mailto:${EMAIL}`}>{EMAIL}</a><span>Kenya</span></div>
+      </div>
+      <div className="footer-bottom"><span>© 2026 JUMAA. All rights reserved.</span><span>Find. List. Connect. Move.</span></div>
+    </footer>
+    <JumaaAssistant />
+  </div>;
+}
+
+function PropertyCard({ p, liked, onLike }) {
+  return <article className="property-card">
+    <div className="property-image"><img src={p.image} alt={p.name}/><div className="image-shade"/>{p.boosted && <span className="boost-badge"><Zap size={13}/> Featured</span>}{p.verified && <span className="verified-badge"><CheckCircle2 size={13}/> Verified</span>}<button className={liked?"heart-button liked":"heart-button"} onClick={onLike} aria-label="Like property"><Heart size={18} fill={liked?"currentColor":"none"}/></button><div className="location-badge"><MapPin size={13}/>{p.county} • {p.area}</div></div>
+    <div className="property-info"><div className="property-title-row"><h3>{p.name}</h3><span className="rating"><Star size={14} fill="currentColor"/>4.7</span></div><p>{p.house} • {p.type}</p><div className="property-bottom"><div><small>From</small><strong>{formatMoney(p.price)}</strong><small>/ month</small></div><a href={`/property/${p.id}`}>View <ArrowRight size={16}/></a></div></div>
+  </article>;
+}
+
+function SearchBar({ initialCounty="", onSearch }) {
+  const [county,setCounty]=useState(initialCounty); const [area,setArea]=useState(""); const [type,setType]=useState(""); const [max,setMax]=useState("");
+  const submit=e=>{e.preventDefault();onSearch?.({county,area,type,max});};
+  return <form className="search-box" onSubmit={submit}>
+    <div className="field"><MapPin size={19}/><div><label>County</label><select value={county} onChange={e=>setCounty(e.target.value)}><option value="">Any county</option><option>Nairobi</option><option>Nakuru</option><option>Kisumu</option><option>Bomet</option><option>Kericho</option></select></div><ChevronDown size={16}/></div>
+    <div className="field"><Building2 size={19}/><div><label>Area</label><input value={area} onChange={e=>setArea(e.target.value)} placeholder="e.g. Kasarani"/></div></div>
+    <div className="field compact"><Home size={19}/><div><label>Property type</label><select value={type} onChange={e=>setType(e.target.value)}><option value="">Any type</option><option>Apartment</option><option>House</option><option>Bedsitter</option></select></div><ChevronDown size={16}/></div>
+    <div className="field compact"><div><label>Max rent</label><input type="number" value={max} onChange={e=>setMax(e.target.value)} placeholder="30,000"/></div></div>
+    <button className="search-button"><Search size={18}/> Search Homes</button>
+  </form>;
+}
+
+function HomePage(){
+ const [liked,setLiked]=useState(new Set());
+ const featured=properties.filter(p=>p.boosted).slice(0,3);
+ const toggle=id=>setLiked(s=>{const n=new Set(s);n.has(id)?n.delete(id):n.add(id);return n});
+ return <Layout><main>
+   <section className="hero"><div className="hero-content"><div className="eyebrow"><span className="pulse-dot"/> Kenya's smarter home search</div><h1>Find a place <span>you'll love</span> to call home.</h1><p>Discover homes across Kenya, compare real property details and connect with property owners through JUMAA.</p><div className="hero-actions"><a href="/properties" className="primary-button">Find a Home <ArrowRight size={18}/></a><a href="/owners" className="secondary-button"><Building2 size={18}/> List Your Property</a></div><div className="hero-trust"><div><ShieldCheck size={17}/> Verified listings</div><div><MapPin size={17}/> Local search</div><div><Users size={17}/> Direct connection</div></div></div><div className="hero-visual"><div className="hero-image-frame"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=90" alt="Modern home"/><div className="image-overlay"/><div className="floating-card property-card-float"><div className="mini-icon"><Home size={18}/></div><div><strong>GreenView Apartments</strong><span>Nakuru, Kenya</span></div><CheckCircle2 className="verified" size={20}/></div><div className="floating-card price-card"><span>Starting from</span><strong>KSh 12,000</strong><small>per month</small></div></div></div></section>
+   <section className="search-section"><div className="search-heading"><span>START SEARCHING</span><h2>Where do you want to live?</h2><p>Search by location, property type and budget.</p></div><SearchBar onSearch={v=>{window.location.href=`/properties${v.county?`?county=${encodeURIComponent(v.county)}`:""}`}}/></section>
+   <section className="stats"><div><strong>01</strong><span>Search</span></div><div><strong>02</strong><span>Explore</span></div><div><strong>03</strong><span>Connect</span></div><div><strong>04</strong><span>Move</span></div></section>
+   <section className="section"><div className="section-top"><div><span className="section-label">FEATURED HOMES</span><h2>Homes getting<br/><em>noticed first.</em></h2></div><p>Boosted properties get priority visibility while every normal listing remains discoverable.</p></div><div className="property-grid">{featured.map(p=><PropertyCard key={p.id} p={p} liked={liked.has(p.id)} onLike={()=>toggle(p.id)}/>)}</div><div className="center-action"><a href="/properties" className="outline-button">Explore all homes <ArrowRight size={17}/></a></div></section>
+   <section className="how-section"><div className="how-image"><img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=85" alt="Apartment interior"/><div className="how-image-label"><Home size={17}/> Your next chapter starts here.</div></div><div className="how-content"><span className="section-label">HOW JUMAA WORKS</span><h2>Finding a home<br/><em>should feel simple.</em></h2><p>JUMAA brings discovery, property information and direct connection into one experience.</p><div className="steps"><div className="step"><span>01</span><div><h3>Search</h3><p>Choose your county, area, budget and property type.</p></div></div><div className="step"><span>02</span><div><h3>Explore</h3><p>Compare photos, units, prices and important property details.</p></div></div><div className="step"><span>03</span><div><h3>Connect</h3><p>Contact the owner, request a viewing or apply.</p></div></div></div></div></section>
+   <section className="owners-section"><div className="owners-content"><span className="section-label">FOR PROPERTY OWNERS</span><h2>Turn vacant units<br/><em>into opportunities.</em></h2><p>JUMAA gives property owners a modern way to list, promote and understand how people interact with their properties.</p><div className="owner-features"><div><Building2/> List properties</div><div><Zap/> Boost visibility</div><div><BarChart3/> Track performance</div><div><Users/> Connect with prospects</div></div><a href="/owners" className="primary-button">Explore Owner Tools <ArrowRight size={18}/></a></div><div className="owners-visual"><div className="owner-dashboard"><div className="panel-top"><span>JUMAA OWNER</span><span className="live"><i/> LIVE</span></div><div className="dash-stat"><span>Property views</span><strong>4,821</strong><small>+18.4%</small></div><div className="chart"><span style={{height:"34%"}}/><span style={{height:"49%"}}/><span style={{height:"41%"}}/><span style={{height:"64%"}}/><span style={{height:"58%"}}/><span style={{height:"82%"}}/><span style={{height:"74%"}}/></div><div className="dashboard-row"><span>❤️ Likes</span><strong>312</strong></div><div className="dashboard-row"><span>📅 Viewing requests</span><strong>21</strong></div></div></div></section>
+   <section className="why-section"><div className="section-center"><span className="section-label">WHY JUMAA</span><h2>More than a listing.<br/><em>A better way to connect.</em></h2></div><div className="why-grid"><div className="why-card"><MapPin/><span>01</span><h3>Local discovery</h3><p>Search using places people actually know — counties, areas and neighbourhoods.</p></div><div className="why-card featured"><ShieldCheck/><span>02</span><h3>Trust first</h3><p>Clear information, verification and transparent property details help people decide with confidence.</p></div><div className="why-card"><Smartphone/><span>03</span><h3>Built for everyday use</h3><p>A fast, mobile-friendly experience backed by the JUMAA app.</p></div></div></section>
+   <section className="download-section"><div className="download-copy"><span className="section-label">JUMAA MOBILE APP</span><h2>Your home search<br/><em>in your pocket.</em></h2><p>Take JUMAA with you and discover properties wherever you are.</p><div className="feature-list"><div><CheckCircle2/> Location-based search</div><div><CheckCircle2/> Property photos & details</div><div><CheckCircle2/> Direct owner contact</div></div><a href={APP_URL} className="primary-button" download><Download size={18}/> Download JUMAA</a></div><div className="phone-showcase"><div className="phone"><div className="phone-notch"/><div className="phone-screen"><div className="phone-top"><span>JUMAA</span><MapPin size={15}/></div><h4>Find your<br/><span>next home.</span></h4><div className="phone-search"><Search size={14}/> Search location</div><img src={properties[0].image} alt="Apartment"/><div className="phone-property"><strong>GreenView Apartments</strong><span>Nakuru • From KSh 12,000</span></div></div></div></div></section>
+   <section className="contact-section"><div><span className="section-label">GET IN TOUCH</span><h2>Let's build<br/><em>JUMAA together.</em></h2><p>Questions, property listings, partnerships or support — we're one message away.</p></div><div className="contact-actions"><a href={WHATSAPP} target="_blank" rel="noreferrer" className="contact-card"><span><FaWhatsapp/></span><div><small>WhatsApp</small><strong>Chat with JUMAA</strong></div><ArrowRight/></a><a href={`mailto:${EMAIL}`} className="contact-card"><span><Mail/></span><div><small>Email</small><strong>Send us a message</strong></div><ArrowRight/></a></div></section>
+ </main></Layout>;
+}
+
+function PropertiesPage(){
+ const params=new URLSearchParams(window.location.search);
+
+ const [filters,setFilters]=useState({
+   county:params.get("county")||"",
+   area:params.get("area")||"",
+   type:"",
+   house:"",
+   min:"",
+   max:"",
+   verified:false
+ });
+
+ const [search,setSearch]=useState(params.get("search")||"");
+ const [sort,setSort]=useState("recommended");
+ const [showFilters,setShowFilters]=useState(false);
+ const [liked,setLiked]=useState(()=>{
+   try{
+     return new Set(JSON.parse(localStorage.getItem("jumaa_saved_properties")||"[]"));
+   }catch{
+     return new Set();
+   }
+ });
+ const [compare,setCompare]=useState([]);
+ const [showCompare,setShowCompare]=useState(false);
+
+ const counties=[...new Set(properties.map(p=>p.county))];
+ const areas=[...new Set(properties.map(p=>p.area))];
+ const types=[...new Set(properties.map(p=>p.type))];
+ const houses=[...new Set(properties.map(p=>p.house))];
+
+ const toggleLike=id=>{
+   setLiked(current=>{
+     const next=new Set(current);
+     if(next.has(id)) next.delete(id);
+     else next.add(id);
+     localStorage.setItem("jumaa_saved_properties",JSON.stringify([...next]));
+     return next;
+   });
+ };
+
+ const toggleCompare=id=>{
+   setCompare(current=>{
+     if(current.includes(id)) return current.filter(x=>x!==id);
+     if(current.length>=3) return current;
+     return [...current,id];
+   });
+ };
+
+ const clearFilters=()=>{
+   setFilters({
+     county:"",
+     area:"",
+     type:"",
+     house:"",
+     min:"",
+     max:"",
+     verified:false
+   });
+   setSearch("");
+ };
+
+ const filtered=useMemo(()=>{
+   const q=search.trim().toLowerCase();
+
+   const result=properties.filter(p=>{
+     const matchesSearch=!q||
+       p.name.toLowerCase().includes(q)||
+       p.county.toLowerCase().includes(q)||
+       p.area.toLowerCase().includes(q)||
+       p.house.toLowerCase().includes(q)||
+       p.type.toLowerCase().includes(q)||
+       p.description.toLowerCase().includes(q);
+
+     const matchesCounty=!filters.county||p.county===filters.county;
+     const matchesArea=!filters.area||p.area===filters.area||p.area.toLowerCase().includes(filters.area.toLowerCase());
+     const matchesType=!filters.type||p.type===filters.type;
+     const matchesHouse=!filters.house||p.house===filters.house;
+     const matchesMin=!filters.min||p.price>=Number(filters.min);
+     const matchesMax=!filters.max||p.price<=Number(filters.max);
+     const matchesVerified=!filters.verified||p.verified;
+
+     return matchesSearch&&matchesCounty&&matchesArea&&matchesType&&matchesHouse&&matchesMin&&matchesMax&&matchesVerified;
+   });
+
+   return [...result].sort((a,b)=>{
+     if(sort==="lowest") return a.price-b.price;
+     if(sort==="highest") return b.price-a.price;
+     if(sort==="likes") return b.likes-a.likes;
+     if(sort==="newest") return Number(b.id.length)-Number(a.id.length);
+
+     // Recommended:
+     // boosted listings first, then verified listings, then engagement.
+     return (
+       Number(b.boosted)-Number(a.boosted) ||
+       Number(b.verified)-Number(a.verified) ||
+       b.likes-a.likes
+     );
+   });
+ },[filters,search,sort]);
+
+ const compared=compare
+   .map(id=>properties.find(p=>p.id===id))
+   .filter(Boolean);
+
+ const activeFilterCount=[
+   filters.county,
+   filters.area,
+   filters.type,
+   filters.house,
+   filters.min,
+   filters.max,
+   filters.verified
+ ].filter(Boolean).length;
+
+ return <Layout><main>
+
+   <section className="page-hero marketplace-hero">
+     <span className="section-label">JUMAA MARKETPLACE</span>
+     <h1>Find a home that<br/><em>fits your life.</em></h1>
+     <p>Search real property options by location, budget, house type and more.</p>
+
+     <div className="market-search">
+       <Search size={19}/>
+       <input
+         value={search}
+         onChange={e=>setSearch(e.target.value)}
+         placeholder="Search property, county, area or house type..."
+         aria-label="Search properties"
+       />
+       {search&&<button className="search-clear" onClick={()=>setSearch("")} aria-label="Clear search"><X size={17}/></button>}
+     </div>
+
+     <div className="market-quick-stats">
+       <span><Building2 size={15}/> {properties.length} listings</span>
+       <span><ShieldCheck size={15}/> {properties.filter(p=>p.verified).length} verified</span>
+       <span><Zap size={15}/> {properties.filter(p=>p.boosted).length} featured</span>
+     </div>
+   </section>
+
+   <section className="marketplace">
+
+     <div className="market-toolbar">
+       <div className="market-result-count">
+         <strong>{filtered.length}</strong>
+         {filtered.length===1?" property":" properties"} found
+         {filters.county&&<> in <b>{filters.county}</b></>}
+         {search&&<> for <b>“{search}”</b></>}
+       </div>
+
+       <div className="market-toolbar-actions">
+         <select
+           className="sort-select"
+           value={sort}
+           onChange={e=>setSort(e.target.value)}
+           aria-label="Sort properties"
+         >
+           <option value="recommended">Recommended</option>
+           <option value="lowest">Lowest rent</option>
+           <option value="highest">Highest rent</option>
+           <option value="likes">Most liked</option>
+           <option value="newest">Newest</option>
+         </select>
+
+         <button className="filter-toggle" onClick={()=>setShowFilters(!showFilters)}>
+           <SlidersHorizontal size={17}/>
+           Filters
+           {activeFilterCount>0&&<span className="filter-count">{activeFilterCount}</span>}
+         </button>
+       </div>
+     </div>
+
+     <div className={showFilters?"market-filter-panel open":"market-filter-panel"}>
+
+       <div className="filter-panel-head">
+         <div>
+           <span className="section-label">REFINE SEARCH</span>
+           <h3>Find your match</h3>
+         </div>
+         {activeFilterCount>0&&(
+           <button className="clear-filters" onClick={clearFilters}>Clear all</button>
+         )}
+       </div>
+
+       <div className="advanced-filters">
+
+         <label>
+           County
+           <select value={filters.county} onChange={e=>setFilters({...filters,county:e.target.value})}>
+             <option value="">Any county</option>
+             {counties.map(x=><option key={x}>{x}</option>)}
+           </select>
+         </label>
+
+         <label>
+           Area
+           <select value={filters.area} onChange={e=>setFilters({...filters,area:e.target.value})}>
+             <option value="">Any area</option>
+             {areas.map(x=><option key={x}>{x}</option>)}
+           </select>
+         </label>
+
+         <label>
+           Property type
+           <select value={filters.type} onChange={e=>setFilters({...filters,type:e.target.value})}>
+             <option value="">Any type</option>
+             {types.map(x=><option key={x}>{x}</option>)}
+           </select>
+         </label>
+
+         <label>
+           House type
+           <select value={filters.house} onChange={e=>setFilters({...filters,house:e.target.value})}>
+             <option value="">Any house type</option>
+             {houses.map(x=><option key={x}>{x}</option>)}
+           </select>
+         </label>
+
+         <label>
+           Minimum rent
+           <input
+             type="number"
+             min="0"
+             value={filters.min}
+             onChange={e=>setFilters({...filters,min:e.target.value})}
+             placeholder="KSh 0"
+           />
+         </label>
+
+         <label>
+           Maximum rent
+           <input
+             type="number"
+             min="0"
+             value={filters.max}
+             onChange={e=>setFilters({...filters,max:e.target.value})}
+             placeholder="KSh 30,000"
+           />
+         </label>
+
+         <label className="verified-filter">
+           <span>Listing quality</span>
+           <button
+             type="button"
+             className={filters.verified?"verified-toggle active":"verified-toggle"}
+             onClick={()=>setFilters({...filters,verified:!filters.verified})}
+           >
+             <ShieldCheck size={16}/>
+             JUMAA Verified only
+           </button>
+         </label>
+
+       </div>
+     </div>
+
+     {compare.length>0&&(
+       <div className="compare-bar">
+         <div>
+           <strong>{compare.length}/3</strong> properties selected for comparison
+         </div>
+         <div className="compare-bar-actions">
+           <button onClick={()=>setCompare([])}>Clear</button>
+           <button className="primary-button" onClick={()=>setShowCompare(true)}>
+             Compare Properties
+           </button>
+         </div>
+       </div>
+     )}
+
+     {filtered.length ? (
+       <>
+         <div className="marketplace-grid property-grid">
+           {filtered.map(p=>
+             <div className="market-property-wrap" key={p.id}>
+               <PropertyCard
+                 p={p}
+                 liked={liked.has(p.id)}
+                 onLike={()=>toggleLike(p.id)}
+               />
+
+               <button
+                 className={compare.includes(p.id)?"compare-select selected":"compare-select"}
+                 onClick={()=>toggleCompare(p.id)}
+                 disabled={!compare.includes(p.id)&&compare.length>=3}
+               >
+                 <span>{compare.includes(p.id)?"✓":"+"}</span>
+                 {compare.includes(p.id)?"Selected":"Compare"}
+               </button>
+             </div>
+           )}
+         </div>
+       </>
+     ) : (
+       <div className="empty-state marketplace-empty">
+         <div className="empty-icon"><Search size={34}/></div>
+         <h3>No homes found</h3>
+         <p>Try changing your location, budget or filters. JUMAA may have another option for you.</p>
+         <button className="primary-button" onClick={clearFilters}>Reset Search</button>
+       </div>
+     )}
+
+     <div className="marketplace-bottom-note">
+       <ShieldCheck size={18}/>
+       <div>
+         <strong>Search with confidence.</strong>
+         <span>Boosted homes appear first, while normal listings remain discoverable.</span>
+       </div>
+     </div>
+
+   </section>
+
+   {showCompare&&(
+     <div className="compare-overlay" onClick={()=>setShowCompare(false)}>
+       <div className="compare-modal" onClick={e=>e.stopPropagation()}>
+
+         <div className="compare-modal-head">
+           <div>
+             <span className="section-label">JUMAA COMPARE</span>
+             <h2>Compare your options.</h2>
+           </div>
+           <button onClick={()=>setShowCompare(false)} aria-label="Close comparison"><X/></button>
+         </div>
+
+         <div className="compare-grid">
+           {compared.map(p=>
+             <div className="compare-card" key={p.id}>
+               <div className="compare-image">
+                 <img src={p.image} alt={p.name}/>
+                 {p.boosted&&<span><Zap size={12}/> Featured</span>}
+               </div>
+
+               <div className="compare-content">
+                 <h3>{p.name}</h3>
+                 <p><MapPin size={14}/> {p.area}, {p.county}</p>
+
+                 <div className="compare-price">
+                   <small>From</small>
+                   <strong>{formatMoney(p.price)}</strong>
+                   <span>/month</span>
+                 </div>
+
+                 <div className="compare-details">
+                   <div><Home size={16}/><span>{p.house}</span></div>
+                   <div><Building2 size={16}/><span>{p.type}</span></div>
+                   <div><Heart size={16}/><span>{p.likes} likes</span></div>
+                   <div>
+                     <ShieldCheck size={16}/>
+                     <span>{p.verified?"Verified":"Standard listing"}</span>
+                   </div>
+                 </div>
+
+                 <a href={`/property/${p.id}`} className="primary-button">
+                   View Property <ArrowRight size={16}/>
+                 </a>
+               </div>
+             </div>
+           )}
+         </div>
+
+         <div className="compare-modal-foot">
+           <span>Comparing {compared.length} of 3 available spaces.</span>
+           <button onClick={()=>{setCompare([]);setShowCompare(false)}}>Clear comparison</button>
+         </div>
+
+       </div>
+     </div>
+   )}
+
+ </main></Layout>;
+}
+
+function PropertyPage({id}){ const p=properties.find(x=>x.id===id)||properties[0]; const [liked,setLiked]=useState(false); return <Layout><main><div className="detail-page"><a href="/properties" className="back-link"><ChevronLeft size={17}/> Back to homes</a><div className="detail-grid"><div><div className="detail-image"><img src={p.image} alt={p.name}/>{p.boosted&&<span className="boost-badge"><Zap size={13}/> Featured</span>}</div><div className="thumb-row"><img src={p.image} alt=""/><img src={properties[(properties.indexOf(p)+1)%properties.length].image} alt=""/><img src={properties[(properties.indexOf(p)+2)%properties.length].image} alt=""/></div></div><div className="detail-copy"><div className="detail-tags">{p.verified&&<span className="verified-inline"><CheckCircle2 size={15}/> JUMAA Verified</span>}<span><Star size={14} fill="currentColor"/> 4.7</span></div><h1>{p.name}</h1><p className="detail-location"><MapPin size={18}/>{p.area}, {p.county}, Kenya</p><div className="detail-price"><small>From</small><strong>{formatMoney(p.price)}</strong><span>/ month</span></div><p className="detail-description">{p.description}</p><div className="amenity-grid"><div><Home/> {p.house}</div><div><Users/> Family friendly</div><div><ShieldCheck/> Secure property</div><div><MapPin/> Local access</div></div><div className="detail-actions"><button className="primary-button" onClick={()=>window.open(WHATSAPP+`?text=${encodeURIComponent(`Hi JUMAA, I'm interested in ${p.name} listed on JUMAA.`)}`,"_blank")}><FaWhatsapp/> WhatsApp Owner</button><button className={liked?"secondary-button liked-action":"secondary-button"} onClick={()=>setLiked(!liked)}><Heart size={18} fill={liked?"currentColor":"none"}/> {liked?"Liked":"Like Property"}</button></div><button className="viewing-button"><CalendarDays size={18}/> Request a Viewing</button></div></div><div className="available-panel"><div><span className="section-label">AVAILABLE UNITS</span><h2>Choose a home.</h2></div><div className="unit-row"><div><strong>A01</strong><span>{p.house}</span></div><strong>{formatMoney(p.price)}</strong><button>Ask about unit</button></div><div className="unit-row"><div><strong>B04</strong><span>{p.beds>=2?"2 Bedroom":p.house}</span></div><strong>{formatMoney(p.price+2500)}</strong><button>Ask about unit</button></div></div></div></main></Layout>;
+}
+
+function OwnersPage(){return <Layout><main><section className="owner-hero"><div><span className="eyebrow"><span className="pulse-dot"/> JUMAA FOR PROPERTY OWNERS</span><h1>Make your property<br/><span>work harder.</span></h1><p>List your properties, reach potential tenants, boost visibility and understand how people interact with your listings.</p><div className="hero-actions"><a href={WHATSAPP} target="_blank" rel="noreferrer" className="primary-button"><FaWhatsapp/> Talk to JUMAA</a><a href="/billing" className="secondary-button">View Pricing <ArrowRight size={17}/></a></div></div><div className="owner-hero-card"><div className="panel-top"><span>PROPERTY PERFORMANCE</span><span className="live"><i/> LIVE</span></div><strong>GreenView Apartments</strong><div className="owner-metric"><span>Views</span><b>4,821</b><small>+18.4%</small></div><div className="mini-bars"><i/><i/><i/><i/><i/><i/><i/></div><div className="metric-row"><span>❤️ Likes</span><b>312</b></div><div className="metric-row"><span>📅 Viewings</span><b>21</b></div></div></section><section className="feature-showcase"><div className="section-center"><span className="section-label">OWNER TOOLS</span><h2>Everything you need<br/><em>to get discovered.</em></h2></div><div className="owner-tool-grid"><div><Building2/><h3>List properties</h3><p>Show property details, photos, locations, units and availability in one place.</p></div><div><Zap/><h3>Boost listings</h3><p>Give your property priority visibility during the period you choose.</p></div><div><BarChart3/><h3>Track engagement</h3><p>Understand views, likes, inquiries and viewing requests.</p></div><div><Users/><h3>Connect directly</h3><p>Turn property interest into conversations and viewing requests.</p></div><div><FileText/><h3>Manage information</h3><p>Keep listings current so potential tenants see useful information.</p></div><div><ShieldCheck/><h3>Build trust</h3><p>Verification and transparent information help quality listings stand out.</p></div></div></section><section className="owner-cta"><span className="section-label">READY WHEN YOU ARE</span><h2>Put your property<br/><em>on JUMAA.</em></h2><p>Your first month is free. Subscription is paid by the property owner or authorized property manager.</p><a href={WHATSAPP} target="_blank" rel="noreferrer" className="primary-button"><MessageCircle size={18}/> Start a conversation</a></section></main></Layout>}
+
+function SimplePage({kind}){ const data={about:{label:"ABOUT JUMAA",title:<>Property discovery,<br/><em>made simpler.</em></>,text:"JUMAA is building a modern way for people to discover homes and for property owners to connect with the people looking for them."},"how-it-works":{label:"HOW IT WORKS",title:<>Find. Connect.<br/><em>Move forward.</em></>,text:"Search properties, explore real listing information and connect directly with owners. Property owners can list and promote their homes through JUMAA."}}[kind]; return <Layout><main><section className="simple-hero"><span className="section-label">{data.label}</span><h1>{data.title}</h1><p>{data.text}</p></section><section className="simple-grid"><div><MapPin/><h3>Local first</h3><p>Search by counties, areas and neighbourhoods that make sense to you.</p></div><div><ShieldCheck/><h3>Trust matters</h3><p>Clear information and verification are part of the JUMAA experience.</p></div><div><Smartphone/><h3>Built for mobile</h3><p>Use the web or take your search with you through the JUMAA app.</p></div></section></main></Layout> }
+
+function FAQ(){const qs=["Is JUMAA free for tenants?","Who pays the JUMAA subscription?","How does property Boost work?","Can I list more than one property?","How do I contact a property owner?","How can I get my property verified?"]; const [open,setOpen]=useState(0); const ans=["Yes. Tenants can browse and discover homes without paying the property owner's JUMAA subscription.","The monthly JUMAA service subscription is paid by the property owner or authorized property manager. It is separate from rent.","Boost gives a property priority visibility for the selected period. When the period ends, the property returns to normal ranking.","JUMAA is designed to support property owners and managers with multiple properties and units.","Open a property listing and use the available contact or WhatsApp action.","Verification is handled through JUMAA's owner/property review process as the platform grows."]; return <Layout><main><section className="simple-hero faq-hero"><span className="section-label">JUMAA FAQ</span><h1>Questions?<br/><em>We've got answers.</em></h1><p>Everything you need to know about finding homes and using JUMAA.</p></section><section className="faq-list">{qs.map((q,i)=><div className={open===i?"faq-item open":"faq-item"} key={q}><button onClick={()=>setOpen(open===i?-1:i)}><span>{q}</span>{open===i?<ChevronDown/>:<ChevronRight/>}</button>{open===i&&<p>{ans[i]}</p>}</div>)}</section></main></Layout>}
+
+function Contact(){const [sent,setSent]=useState(false); return <Layout><main><section className="contact-page"><div className="contact-intro"><span className="section-label">CONTACT JUMAA</span><h1>Let's talk<br/><em>about JUMAA.</em></h1><p>Need help, want to list a property or discuss a partnership? Send us a message.</p><div className="contact-list"><a href={WHATSAPP} target="_blank" rel="noreferrer"><FaWhatsapp/><span><small>WhatsApp</small><b>Chat with us</b></span></a><a href={`tel:+254${PHONE.slice(1)}`}><Phone/><span><small>Phone</small><b>{PHONE}</b></span></a><a href={`mailto:${EMAIL}`}><Mail/><span><small>Email</small><b>{EMAIL}</b></span></a></div></div><form className="contact-form" onSubmit={e=>{e.preventDefault();setSent(true)}}><label>Name<input required placeholder="Your name"/></label><label>Email<input type="email" required placeholder="you@example.com"/></label><label>What can we help with?<select><option>Finding a home</option><option>Listing a property</option><option>Boosting a property</option><option>Partnership</option><option>Support</option></select></label><label>Message<textarea required rows="6" placeholder="Tell us how we can help..."/></label><button className="primary-button">{sent?"Message ready — contact us on WhatsApp":"Send Message"}<ArrowRight size={18}/></button>{sent&&<p className="form-note">For the fastest response, use the WhatsApp button above to send your message directly.</p>}</form></section></main></Layout>}
+
+
+function ReportScamPage(){
+ const [submitted,setSubmitted]=useState(false);
+ const [form,setForm]=useState({
+   property:"",
+   name:"",
+   email:"",
+   phone:"",
+   reason:"",
+   message:"",
+   evidence:""
+ });
+
+ const update=(key,value)=>setForm({...form,[key]:value});
+
+ const submit=e=>{
+   e.preventDefault();
+
+   const reports=JSON.parse(localStorage.getItem("jumaa_scam_reports")||"[]");
+
+   reports.push({
+     ...form,
+     id:`JRM-${Date.now()}`,
+     createdAt:new Date().toISOString(),
+     status:"received"
+   });
+
+   localStorage.setItem("jumaa_scam_reports",JSON.stringify(reports));
+   setSubmitted(true);
+ };
+
+ return <Layout><main>
+
+   <section className="scam-hero">
+     <div className="scam-hero-content">
+       <span className="eyebrow">
+         <span className="pulse-dot"/>
+         JUMAA SAFETY CENTER
+       </span>
+
+       <h1>See something suspicious?<br/><em>Report it.</em></h1>
+
+       <p>
+         Help protect other home seekers by reporting properties,
+         owners or rental activity that you believe may be fraudulent.
+       </p>
+
+       <div className="scam-warning">
+         <ShieldCheck size={20}/>
+         <div>
+           <strong>Never send money before verifying a property.</strong>
+           <span>
+             Do not share passwords, PINs, OTPs or sensitive financial information
+             with someone claiming to represent a property.
+           </span>
+         </div>
+       </div>
+     </div>
+
+     <div className="scam-hero-icon">
+       <div><ShieldCheck size={58}/></div>
+       <span>SAFETY<br/>FIRST</span>
+     </div>
+   </section>
+
+   <section className="scam-content">
+
+     <div className="scam-info">
+
+       <span className="section-label">RENTAL SAFETY</span>
+       <h2>Common warning signs.</h2>
+
+       <div className="scam-sign">
+         <span>01</span>
+         <div>
+           <h3>Pressure to pay immediately</h3>
+           <p>
+             Someone demands a deposit, viewing fee or “booking fee”
+             before you can properly verify the property.
+           </p>
+         </div>
+       </div>
+
+       <div className="scam-sign">
+         <span>02</span>
+         <div>
+           <h3>Price looks too good to be true</h3>
+           <p>
+             An unusually cheap property can be a warning sign,
+             especially when combined with urgent payment requests.
+           </p>
+         </div>
+       </div>
+
+       <div className="scam-sign">
+         <span>03</span>
+         <div>
+           <h3>They refuse a viewing</h3>
+           <p>
+             Be careful if someone repeatedly avoids physical or
+             legitimate virtual verification of the property.
+           </p>
+         </div>
+       </div>
+
+       <div className="scam-sign">
+         <span>04</span>
+         <div>
+           <h3>Requests for sensitive information</h3>
+           <p>
+             Never provide passwords, OTPs, banking PINs or other
+             authentication secrets to a property contact.
+           </p>
+         </div>
+       </div>
+
+       <div className="scam-help-box">
+         <ShieldCheck size={20}/>
+         <div>
+           <strong>When in doubt, stop.</strong>
+           <p>
+             Don't send money or sensitive information until you've
+             independently verified the property and the person
+             claiming to represent it.
+           </p>
+         </div>
+       </div>
+
+     </div>
+
+     <div className="scam-form-wrap">
+
+       {submitted ? (
+         <div className="scam-success">
+           <div className="success-icon">
+             <CheckCircle2 size={34}/>
+           </div>
+
+           <span className="section-label">REPORT RECEIVED</span>
+
+           <h2>Thank you for speaking up.</h2>
+
+           <p>
+             Your report has been recorded and assigned a reference number.
+             JUMAA can use reports like this to investigate suspicious listings
+             and improve marketplace safety.
+           </p>
+
+           <div className="report-reference">
+             <small>REPORT REFERENCE</small>
+             <strong>JRM-{Date.now().toString().slice(-8)}</strong>
+           </div>
+
+           <div className="success-actions">
+             <a href="/properties" className="primary-button">
+               Return to Marketplace <ArrowRight size={17}/>
+             </a>
+
+             <button
+               className="secondary-button"
+               onClick={()=>{
+                 setSubmitted(false);
+                 setForm({
+                   property:"",
+                   name:"",
+                   email:"",
+                   phone:"",
+                   reason:"",
+                   message:"",
+                   evidence:""
+                 });
+               }}
+             >
+               Submit another report
+             </button>
+           </div>
+         </div>
+       ) : (
+
+         <form className="scam-form" onSubmit={submit}>
+
+           <div className="form-heading">
+             <span className="section-label">REPORT A LISTING</span>
+             <h2>Tell us what happened.</h2>
+             <p>
+               Please provide as much useful information as possible.
+             </p>
+           </div>
+
+           <label>
+             Property or listing name
+             <input
+               required
+               value={form.property}
+               onChange={e=>update("property",e.target.value)}
+               placeholder="e.g. GreenView Apartments"
+             />
+           </label>
+
+           <label>
+             What are you reporting?
+             <select
+               required
+               value={form.reason}
+               onChange={e=>update("reason",e.target.value)}
+             >
+               <option value="">Select a reason</option>
+               <option>Suspected fake property</option>
+               <option>Payment scam</option>
+               <option>Fake property owner</option>
+               <option>Misleading property information</option>
+               <option>Suspicious contact</option>
+               <option>Harassment or threats</option>
+               <option>Other suspicious activity</option>
+             </select>
+           </label>
+
+           <div className="scam-form-row">
+
+             <label>
+               Your name
+               <input
+                 value={form.name}
+                 onChange={e=>update("name",e.target.value)}
+                 placeholder="Optional"
+               />
+             </label>
+
+             <label>
+               Email
+               <input
+                 type="email"
+                 value={form.email}
+                 onChange={e=>update("email",e.target.value)}
+                 placeholder="Optional"
+               />
+             </label>
+
+           </div>
+
+           <label>
+             Phone number involved
+             <input
+               value={form.phone}
+               onChange={e=>update("phone",e.target.value)}
+               placeholder="Optional"
+             />
+           </label>
+
+           <label>
+             What happened?
+             <textarea
+               required
+               rows="6"
+               value={form.message}
+               onChange={e=>update("message",e.target.value)}
+               placeholder="Explain what made the listing or interaction suspicious..."
+             />
+           </label>
+
+           <label>
+             Additional evidence or reference
+             <input
+               value={form.evidence}
+               onChange={e=>update("evidence",e.target.value)}
+               placeholder="Listing URL, transaction reference, screenshots reference, etc."
+             />
+           </label>
+
+           <div className="scam-form-security">
+             <ShieldCheck size={18}/>
+             <span>
+               Do not include passwords, OTPs, PINs, API keys or other
+               authentication secrets in your report.
+             </span>
+           </div>
+
+           <button className="primary-button scam-submit">
+             Submit Scam Report <ArrowRight size={18}/>
+           </button>
+
+         </form>
+
+       )}
+
+     </div>
+
+   </section>
+
+   <section className="scam-footer">
+     <ShieldCheck size={22}/>
+     <div>
+       <strong>JUMAA Safety Promise</strong>
+       <p>
+         Reports help JUMAA identify suspicious activity and protect
+         people using the marketplace. A report does not automatically
+         mean a listing is fraudulent; reported information should be
+         reviewed before action is taken.
+       </p>
+     </div>
+   </section>
+
+ </main></Layout>;
+}
+
+function BillingPage(){const plans=[["1–10 units","KSh 1,000 / month"],["11–20 units","KSh 2,000 / month"],["21–30 units","KSh 3,000 / month"],["31–40 units","KSh 4,000 / month"],["41–50 units","KSh 5,000 / month"],["51–60 units","KSh 6,000 / month"],["61–70 units","KSh 7,000 / month"],["71–80 units","KSh 8,000 / month"],["81–90 units","KSh 9,000 / month"],["91–100 units","KSh 10,000 / month"],["101+ units","Custom plan"]];return <Layout><main><section className="billing-hero"><span className="section-label">JUMAA BILLING</span><h1>Simple pricing.<br/><em>Built for property owners.</em></h1><p>Transparent monthly service pricing based on the number of units in a property.</p></section><section className="billing-wrap"><div className="billing-table"><div className="billing-table-head"><span>PROPERTY SIZE</span><span>MONTHLY JUMAA SERVICE</span></div>{plans.map(x=><div className="billing-table-row" key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong></div>)}</div><div className="billing-owner-message"><ShieldCheck size={22}/><div><strong>Tenants do not pay the JUMAA subscription.</strong><p>The service fee is paid by the property owner or authorized property manager. It is separate from rent, deposits, utilities and other property charges.</p><div className="billing-free"><CheckCircle2 size={18}/><span><b>First month FREE.</b> The applicable subscription starts from month two.</span></div><a href={WHATSAPP} target="_blank" rel="noreferrer" className="primary-button">Talk to JUMAA <ArrowRight size={17}/></a></div></div></section></main></Layout>}
+
+export default function App(){const path=window.location.pathname.replace(/\/$/,"")||"/"; if(path==="/billing")return <BillingPage/>; if(path==="/properties")return <PropertiesPage/>; if(path.startsWith("/property/"))return <PropertyPage id={path.split("/")[2]}/>; if(path==="/owners")return <OwnersPage/>; if(path==="/about")return <SimplePage kind="about"/>; if(path==="/how-it-works")return <SimplePage kind="how-it-works"/>; if(path==="/faq")return <FAQ/>; if(path==="/report-scam")return <ReportScamPage/>; if(path==="/contact")return <Contact/>; return <HomePage/>;}
