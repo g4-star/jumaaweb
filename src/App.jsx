@@ -686,8 +686,8 @@ function PropertiesPage(){
 
    <section className="page-hero marketplace-hero">
      <span className="section-label">JUMAA MARKETPLACE</span>
-     <h1>Find a home that<br/><em>fits your life.</em></h1>
-     <p>Search real property options by location, budget, house type and more.</p>
+     <h1>Apartments & Rental Homes <br/><em>in Kenya</em></h1>
+     <p>Find apartments and rental homes by county, area, house type and monthly budget.</p>
 
      <div className="market-search">
        <Search size={19}/>
