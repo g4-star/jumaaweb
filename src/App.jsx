@@ -943,21 +943,25 @@ function PropertyPage({id}){
  const [liked,setLiked]=useState(false);
 
  useEffect(()=>{
-   if (!p) {
-     document.title = "Property unavailable | JUMAA";
+   const setMeta = (selector, attribute, content) => {
+     let el = document.head.querySelector(selector);
 
-     const setMeta = (selector, attribute, content) => {
-       let el = document.head.querySelector(selector);
+     if (!el) {
+       el = document.createElement("meta");
+       const match = selector.match(/(?:name|property)="([^"]+)"/);
 
-       if (!el) {
-         el = document.createElement("meta");
-         const match = selector.match(/(?:name|property)="([^"]+)"/);
-         if (match) el.setAttribute(attribute, match[1]);
-         document.head.appendChild(el);
+       if (match) {
+         el.setAttribute(attribute, match[1]);
        }
 
-       el.setAttribute("content", content);
-     };
+       document.head.appendChild(el);
+     }
+
+     el.setAttribute("content", content);
+   };
+
+   if (!p) {
+     document.title = "Property unavailable | JUMAA";
 
      setMeta(
        'meta[name="description"]',
@@ -965,40 +969,93 @@ function PropertyPage({id}){
        "This property is not available at the moment. Explore other apartments and rental homes on JUMAA."
      );
 
-     setMeta('meta[name="robots"]', "name", "noindex, follow");
+     setMeta(
+       'meta[name="robots"]',
+       "name",
+       "noindex, follow"
+     );
 
-     const schema = document.head.querySelector('script[data-jumaa-property-schema]');
-     if (schema) schema.remove();
+     const schema = document.head.querySelector(
+       'script[data-jumaa-property-schema]'
+     );
 
-     return;
+     if (schema) {
+       schema.remove();
+     }
+
+     return ()=>{
+       document.title = "JUMAA – Find Apartments & Rental Homes in Kenya";
+     };
    }
 
-   const title = `${p.name} | ${p.house} in ${p.area}, ${p.county} | JUMAA`;
-   const description = `Find ${p.name} in ${p.area}, ${p.county}, Kenya. ${p.house} from ${formatMoney(p.price)} per month. Discover rental homes and connect with property owners through JUMAA.`;
-   const canonical = `https://jumaaweb.vercel.app/property/${p.id}`;
+   const title =
+     `${p.name} | ${p.house} in ${p.area}, ${p.county} | JUMAA`;
+
+   const description =
+     `Find ${p.name} in ${p.area}, ${p.county}, Kenya. ${p.house} from ${formatMoney(p.price)} per month. Discover rental homes and connect with property owners through JUMAA.`;
+
+   const canonical =
+     `https://jumaaweb.vercel.app/property/${p.id}`;
 
    document.title = title;
 
-   const setMeta = (selector, attribute, content) => {
-     let el = document.head.querySelector(selector);
+   setMeta(
+     'meta[name="description"]',
+     "name",
+     description
+   );
 
-     if (!el) {
-       el = document.createElement("meta");
-       const match = selector.match(/(?:name|property)="([^"]+)"/);
-       if (match) el.setAttribute(attribute, match[1]);
-       document.head.appendChild(el);
-     }
+   setMeta(
+     'meta[name="robots"]',
+     "name",
+     "index, follow"
+   );
 
-     el.setAttribute("content", content);
-   };
+   setMeta(
+     'meta[property="og:title"]',
+     "property",
+     title
+   );
 
-   setMeta('meta[name="description"]', "name", description);
-   setMeta('meta[name="robots"]', "name", "index, follow");
-   setMeta('meta[property="og:title"]', "property", title);
-   setMeta('meta[property="og:description"]', "property", description);
-   setMeta('meta[property="og:url"]', "property", canonical);
+   setMeta(
+     'meta[property="og:description"]',
+     "property",
+     description
+   );
 
-   let link = document.head.querySelector('link[rel="canonical"]');
+   setMeta(
+     'meta[property="og:url"]',
+     "property",
+     canonical
+   );
+
+   setMeta(
+     'meta[property="og:image"]',
+     "property",
+     p.image
+   );
+
+   setMeta(
+     'meta[name="twitter:title"]',
+     "name",
+     title
+   );
+
+   setMeta(
+     'meta[name="twitter:description"]',
+     "name",
+     description
+   );
+
+   setMeta(
+     'meta[name="twitter:image"]',
+     "name",
+     p.image
+   );
+
+   let link = document.head.querySelector(
+     'link[rel="canonical"]'
+   );
 
    if (!link) {
      link = document.createElement("link");
@@ -1008,12 +1065,21 @@ function PropertyPage({id}){
 
    link.setAttribute("href", canonical);
 
-   const existingSchema = document.head.querySelector('script[data-jumaa-property-schema]');
-   if (existingSchema) existingSchema.remove();
+   const existingSchema = document.head.querySelector(
+     'script[data-jumaa-property-schema]'
+   );
+
+   if (existingSchema) {
+     existingSchema.remove();
+   }
 
    const schema = document.createElement("script");
+
    schema.type = "application/ld+json";
-   schema.setAttribute("data-jumaa-property-schema", "true");
+   schema.setAttribute(
+     "data-jumaa-property-schema",
+     "true"
+   );
 
    schema.textContent = JSON.stringify({
      "@context": "https://schema.org",
@@ -1066,79 +1132,124 @@ function PropertyPage({id}){
    </main></Layout>;
  }
 
- useEffect(()=>{
-   const title = `${p.name} | ${p.house} in ${p.area}, ${p.county} | JUMAA`;
-   const description = `Find ${p.name} in ${p.area}, ${p.county}, Kenya. ${p.house} from ${formatMoney(p.price)} per month. Discover rental homes and connect with property owners through JUMAA.`;
-   const canonical = `https://jumaaweb.vercel.app/property/${p.id}`;
+ return <Layout><main>
+   <div className="detail-page">
+     <a href="/properties" className="back-link">
+       <ChevronLeft size={17}/> Back to homes
+     </a>
 
-   document.title = title;
+     <div className="detail-grid">
+       <div>
+         <div className="detail-image">
+           <img src={p.image} alt={p.name}/>
+           {p.boosted&&<span className="boost-badge">
+             <Zap size={13}/> Featured
+           </span>}
+         </div>
 
-   const setMeta = (selector, attribute, content) => {
-     let el = document.head.querySelector(selector);
+         <div className="thumb-row">
+           <img src={p.image} alt=""/>
+           <img src={properties[(properties.indexOf(p)+1)%properties.length].image} alt=""/>
+           <img src={properties[(properties.indexOf(p)+2)%properties.length].image} alt=""/>
+         </div>
+       </div>
 
-     if (!el) {
-       el = document.createElement("meta");
-       const match = selector.match(/(?:name|property)="([^"]+)"/);
-       if (match) el.setAttribute(attribute, match[1]);
-       document.head.appendChild(el);
-     }
+       <div className="detail-copy">
+         <div className="detail-tags">
+           {p.verified&&<span className="verified-inline">
+             <CheckCircle2 size={15}/> JUMAA Verified
+           </span>}
+           <span>
+             <Star size={14} fill="currentColor"/> 4.7
+           </span>
+         </div>
 
-     el.setAttribute("content", content);
-   };
+         <h1>{p.name}</h1>
 
-   setMeta('meta[name="description"]', "name", description);
-   setMeta('meta[property="og:title"]', "property", title);
-   setMeta('meta[property="og:description"]', "property", description);
-   setMeta('meta[property="og:url"]', "property", canonical);
+         <p className="detail-location">
+           <MapPin size={18}/>{p.area}, {p.county}, Kenya
+         </p>
 
-   let link = document.head.querySelector('link[rel="canonical"]');
+         <div className="detail-price">
+           <small>From</small>
+           <strong>{formatMoney(p.price)}</strong>
+           <span>/ month</span>
+         </div>
 
-   if (!link) {
-     link = document.createElement("link");
-     link.setAttribute("rel", "canonical");
-     document.head.appendChild(link);
-   }
+         <p className="detail-description">
+           {p.description}
+         </p>
 
-   link.setAttribute("href", canonical);
+         <div className="amenity-grid">
+           <div><Home/> {p.house}</div>
+           <div><Users/> Family friendly</div>
+           <div><ShieldCheck/> Secure property</div>
+           <div><MapPin/> Local access</div>
+         </div>
 
-   const existingSchema = document.head.querySelector('script[data-jumaa-property-schema]');
-   if (existingSchema) existingSchema.remove();
+         <div className="detail-actions">
+           <button
+             className="primary-button"
+             onClick={()=>window.open(
+               WHATSAPP+
+               `?text=${encodeURIComponent(
+                 `Hi JUMAA, I'm interested in ${p.name} listed on JUMAA.`
+               )}`,
+               "_blank"
+             )}
+           >
+             <FaWhatsapp/> WhatsApp Owner
+           </button>
 
-   const schema = document.createElement("script");
-   schema.type = "application/ld+json";
-   schema.setAttribute("data-jumaa-property-schema", "true");
+           <button
+             className={
+               liked
+                 ? "secondary-button liked-action"
+                 : "secondary-button"
+             }
+             onClick={()=>setLiked(!liked)}
+           >
+             <Heart
+               size={18}
+               fill={liked?"currentColor":"none"}
+             />
+             {liked?"Liked":"Like Property"}
+           </button>
+         </div>
 
-   schema.textContent = JSON.stringify({
-     "@context": "https://schema.org",
-     "@type": "Apartment",
-     "name": p.name,
-     "description": p.description,
-     "image": [p.image],
-     "url": canonical,
-     "address": {
-       "@type": "PostalAddress",
-       "addressLocality": p.area,
-       "addressRegion": p.county,
-       "addressCountry": "KE"
-     },
-     "numberOfBedrooms": p.beds,
-     "offers": {
-       "@type": "Offer",
-       "price": p.price,
-       "priceCurrency": "KES",
-       "availability": "https://schema.org/InStock",
-       "url": canonical
-     }
-   });
+         <button className="viewing-button">
+           <CalendarDays size={18}/> Request a Viewing
+         </button>
+       </div>
+     </div>
 
-   document.head.appendChild(schema);
+     <div className="available-panel">
+       <div>
+         <span className="section-label">AVAILABLE UNITS</span>
+         <h2>Choose a home.</h2>
+       </div>
 
-   return ()=>{
-     document.title = "JUMAA – Find Apartments & Rental Homes in Kenya";
-   };
- },[p]); return <Layout><main><div className="detail-page"><a href="/properties" className="back-link"><ChevronLeft size={17}/> Back to homes</a><div className="detail-grid"><div><div className="detail-image"><img src={p.image} alt={p.name}/>{p.boosted&&<span className="boost-badge"><Zap size={13}/> Featured</span>}</div><div className="thumb-row"><img src={p.image} alt=""/><img src={properties[(properties.indexOf(p)+1)%properties.length].image} alt=""/><img src={properties[(properties.indexOf(p)+2)%properties.length].image} alt=""/></div></div><div className="detail-copy"><div className="detail-tags">{p.verified&&<span className="verified-inline"><CheckCircle2 size={15}/> JUMAA Verified</span>}<span><Star size={14} fill="currentColor"/> 4.7</span></div><h1>{p.name}</h1><p className="detail-location"><MapPin size={18}/>{p.area}, {p.county}, Kenya</p><div className="detail-price"><small>From</small><strong>{formatMoney(p.price)}</strong><span>/ month</span></div><p className="detail-description">{p.description}</p><div className="amenity-grid"><div><Home/> {p.house}</div><div><Users/> Family friendly</div><div><ShieldCheck/> Secure property</div><div><MapPin/> Local access</div></div><div className="detail-actions"><button className="primary-button" onClick={()=>window.open(WHATSAPP+`?text=${encodeURIComponent(`Hi JUMAA, I'm interested in ${p.name} listed on JUMAA.`)}`,"_blank")}><FaWhatsapp/> WhatsApp Owner</button><button className={liked?"secondary-button liked-action":"secondary-button"} onClick={()=>setLiked(!liked)}><Heart size={18} fill={liked?"currentColor":"none"}/> {liked?"Liked":"Like Property"}</button></div><button className="viewing-button"><CalendarDays size={18}/> Request a Viewing</button></div></div><div className="available-panel"><div><span className="section-label">AVAILABLE UNITS</span><h2>Choose a home.</h2></div><div className="unit-row"><div><strong>A01</strong><span>{p.house}</span></div><strong>{formatMoney(p.price)}</strong><button>Ask about unit</button></div><div className="unit-row"><div><strong>B04</strong><span>{p.beds>=2?"2 Bedroom":p.house}</span></div><strong>{formatMoney(p.price+2500)}</strong><button>Ask about unit</button></div></div></div></main></Layout>;
+       <div className="unit-row">
+         <div>
+           <strong>A01</strong>
+           <span>{p.house}</span>
+         </div>
+         <strong>{formatMoney(p.price)}</strong>
+         <button>Ask about unit</button>
+       </div>
+
+       <div className="unit-row">
+         <div>
+           <strong>B04</strong>
+           <span>{p.beds>=2?"2 Bedroom":p.house}</span>
+         </div>
+         <strong>{formatMoney(p.price+2500)}</strong>
+         <button>Ask about unit</button>
+       </div>
+     </div>
+   </div>
+ </main></Layout>;
 }
-
 function OwnersPage(){return <Layout><main><section className="owner-hero"><div><span className="eyebrow"><span className="pulse-dot"/> JUMAA FOR PROPERTY OWNERS</span><h1>Make your property<br/><span>work harder.</span></h1><p>List your properties, reach potential tenants, boost visibility and understand how people interact with your listings.</p><div className="hero-actions"><a href={WHATSAPP} target="_blank" rel="noreferrer" className="primary-button"><FaWhatsapp/> Talk to JUMAA</a><a href="/billing" className="secondary-button">View Pricing <ArrowRight size={17}/></a></div></div><div className="owner-hero-card"><div className="panel-top"><span>PROPERTY PERFORMANCE</span><span className="live"><i/> LIVE</span></div><strong>GreenView Apartments</strong><div className="owner-metric"><span>Views</span><b>4,821</b><small>+18.4%</small></div><div className="mini-bars"><i/><i/><i/><i/><i/><i/><i/></div><div className="metric-row"><span>❤️ Likes</span><b>312</b></div><div className="metric-row"><span>📅 Viewings</span><b>21</b></div></div></section><section className="feature-showcase"><div className="section-center"><span className="section-label">OWNER TOOLS</span><h2>Everything you need<br/><em>to get discovered.</em></h2></div><div className="owner-tool-grid"><div><Building2/><h3>List properties</h3><p>Show property details, photos, locations, units and availability in one place.</p></div><div><Zap/><h3>Boost listings</h3><p>Give your property priority visibility during the period you choose.</p></div><div><BarChart3/><h3>Track engagement</h3><p>Understand views, likes, inquiries and viewing requests.</p></div><div><Users/><h3>Connect directly</h3><p>Turn property interest into conversations and viewing requests.</p></div><div><FileText/><h3>Manage information</h3><p>Keep listings current so potential tenants see useful information.</p></div><div><ShieldCheck/><h3>Build trust</h3><p>Verification and transparent information help quality listings stand out.</p></div></div></section><section className="owner-cta"><span className="section-label">READY WHEN YOU ARE</span><h2>Put your property<br/><em>on JUMAA.</em></h2><p>Your first month is free. Subscription is paid by the property owner or authorized property manager.</p><a href={WHATSAPP} target="_blank" rel="noreferrer" className="primary-button"><MessageCircle size={18}/> Start a conversation</a></section></main></Layout>}
 
 function SimplePage({kind}){ const data={about:{label:"ABOUT JUMAA",title:<>Property discovery,<br/><em>made simpler.</em></>,text:"JUMAA is building a modern way for people to discover homes and for property owners to connect with the people looking for them."},"how-it-works":{label:"HOW IT WORKS",title:<>Find. Connect.<br/><em>Move forward.</em></>,text:"Search properties, explore real listing information and connect directly with owners. Property owners can list and promote their homes through JUMAA."}}[kind]; return <Layout><main><section className="simple-hero"><span className="section-label">{data.label}</span><h1>{data.title}</h1><p>{data.text}</p></section><section className="simple-grid"><div><MapPin/><h3>Local first</h3><p>Search by counties, areas and neighbourhoods that make sense to you.</p></div><div><ShieldCheck/><h3>Trust matters</h3><p>Clear information and verification are part of the JUMAA experience.</p></div><div><Smartphone/><h3>Built for mobile</h3><p>Use the web or take your search with you through the JUMAA app.</p></div></section></main></Layout> }
