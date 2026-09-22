@@ -373,4 +373,39 @@
     <priority>0.8</priority>
   </url>
 
+  <url>
+    <loc>https://jumaaweb.vercel.app/apartments/nairobi/kasarani</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jumaaweb.vercel.app/apartments/nairobi/westlands</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jumaaweb.vercel.app/apartments/nakuru/nakuru-town</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jumaaweb.vercel.app/apartments/nakuru/milimani</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jumaaweb.vercel.app/apartments/bomet/bomet-town</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jumaaweb.vercel.app/apartments/kisumu/milimani</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jumaaweb.vercel.app/apartments/kericho/town</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>

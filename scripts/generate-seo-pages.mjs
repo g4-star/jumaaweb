@@ -113,6 +113,60 @@ const staticRoutes = [
   "billing"
 ];
 
+
+const areas = [
+  {
+    slug: "nairobi/kasarani",
+    name: "Kasarani",
+    county: "Nairobi",
+    intro:
+      "Find apartments for rent in Kasarani, Nairobi with JUMAA. Explore available homes, compare bedrooms and monthly rent, and connect directly with property owners."
+  },
+  {
+    slug: "nairobi/westlands",
+    name: "Westlands",
+    county: "Nairobi",
+    intro:
+      "Explore apartments for rent in Westlands, Nairobi with JUMAA. Compare available homes, monthly rent and bedroom options, then connect directly with property owners."
+  },
+  {
+    slug: "nakuru/nakuru-town",
+    name: "Nakuru Town",
+    county: "Nakuru",
+    intro:
+      "Find apartments for rent in Nakuru Town with JUMAA. Explore available rental homes, compare monthly rent and bedrooms, and connect directly with property owners."
+  },
+  {
+    slug: "nakuru/milimani",
+    name: "Milimani",
+    county: "Nakuru",
+    intro:
+      "Explore apartments for rent in Milimani, Nakuru with JUMAA. Discover available homes, compare rental prices and bedrooms, and connect directly with property owners."
+  },
+  {
+    slug: "bomet/bomet-town",
+    name: "Bomet Town",
+    county: "Bomet",
+    intro:
+      "Find apartments for rent in Bomet Town with JUMAA. Explore available homes, compare monthly rent and bedroom options, and connect directly with property owners."
+  },
+  {
+    slug: "kisumu/milimani",
+    name: "Milimani",
+    county: "Kisumu",
+    intro:
+      "Find apartments for rent in Milimani, Kisumu with JUMAA. Explore available homes, compare monthly rent and bedrooms, and connect directly with property owners."
+  },
+  {
+    slug: "kericho/town",
+    name: "Kericho Town",
+    propertyArea: "Town",
+    county: "Kericho",
+    intro:
+      "Explore apartments for rent in Kericho Town with JUMAA. Find available rental homes, compare monthly rent and bedrooms, and connect directly with property owners."
+  }
+];
+
 const locations = [
   {
     slug: "nairobi",
@@ -564,6 +618,127 @@ function buildPropertyHtml(property) {
   return html;
 }
 
+function buildAreaHtml(area) {
+  const areaProperties = properties.filter(
+    property =>
+      property.county === area.county &&
+      property.area === (area.propertyArea || area.name)
+  );
+
+  const canonical =
+    `https://jumaaweb.vercel.app/apartments/${area.slug}`;
+
+  const title =
+    `Apartments for Rent in ${area.name}, ${area.county} | JUMAA`;
+
+  const description = area.intro;
+
+  const propertyItems = areaProperties.map((property, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    url: `https://jumaaweb.vercel.app/property/${property.id}`,
+    name: property.name
+  }));
+
+  const cards = areaProperties.length
+    ? areaProperties.map(property => `
+        <article>
+          <a href="/property/${property.id}">
+            <img
+              src="${property.image}"
+              alt="${property.name} in ${property.area}, ${property.county}"
+              loading="lazy"
+            />
+            <h2>${property.name}</h2>
+          </a>
+          <p>${property.house} · KSh ${property.price.toLocaleString()} / month</p>
+          <p>${property.description}</p>
+        </article>
+      `).join("")
+    : `<p>No properties are currently listed in ${area.name}.</p>`;
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: title,
+    description,
+    url: canonical,
+    about: {
+      "@type": "Place",
+      name: `${area.name}, ${area.county}, Kenya`
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: propertyItems
+    }
+  };
+
+  const staticMain = `
+    <main>
+      <p>JUMAA — Kenya home search</p>
+      <h1>Apartments for Rent in ${area.name}, ${area.county}</h1>
+      <p>${description}</p>
+
+      <section>
+        <h2>Available homes in ${area.name}</h2>
+        ${cards}
+      </section>
+
+      <p>
+        Browse more
+        <a href="/apartments/${area.county.toLowerCase().replace(/[^a-z0-9]+/g, "-")}">
+          apartments in ${area.county}
+        </a>.
+      </p>
+    </main>
+  `;
+
+  let html = baseHtml
+    .replace(/<title>.*?<\/title>/i, `<title>${title}</title>`)
+    .replace(
+      /<meta name="description" content=".*?">/i,
+      `<meta name="description" content="${description}">`
+    )
+    .replace(
+      /<meta name="robots" content=".*?">/i,
+      `<meta name="robots" content="index, follow">`
+    )
+    .replace(
+      /<link rel="canonical" href=".*?">/i,
+      `<link rel="canonical" href="${canonical}">`
+    )
+    .replace(
+      /<meta property="og:title" content=".*?">/i,
+      `<meta property="og:title" content="${title}">`
+    )
+    .replace(
+      /<meta property="og:description" content=".*?">/i,
+      `<meta property="og:description" content="${description}">`
+    )
+    .replace(
+      /<meta property="og:url" content=".*?">/i,
+      `<meta property="og:url" content="${canonical}">`
+    )
+    .replace(
+      /<meta name="twitter:title" content=".*?">/i,
+      `<meta name="twitter:title" content="${title}">`
+    )
+    .replace(
+      /<meta name="twitter:description" content=".*?">/i,
+      `<meta name="twitter:description" content="${description}">`
+    )
+    .replace(
+      /<script type="application\/ld\+json">[\s\S]*?<\/script>/i,
+      `<script type="application/ld+json">${JSON.stringify(schema)}</script>`
+    )
+    .replace(
+      /<div id="root">[\s\S]*?<\/div>/i,
+      `<div id="root">${staticMain}</div>`
+    );
+
+  return html;
+}
+
 function buildLocationHtml(location) {
   const canonical =
     `https://jumaaweb.vercel.app/apartments/${location.slug}`;
@@ -731,6 +906,13 @@ for (const location of locations) {
   writePage(
     `apartments/${location.slug}`,
     buildLocationHtml(location)
+  );
+}
+
+for (const area of areas) {
+  writePage(
+    `apartments/${area.slug}`,
+    buildAreaHtml(area)
   );
 }
 
