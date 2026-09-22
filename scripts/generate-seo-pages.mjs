@@ -704,27 +704,27 @@ function buildAreaHtml(area) {
       `<meta name="robots" content="index, follow">`
     )
     .replace(
-      /<link rel="canonical" href=".*?">/i,
+      /<link\s+rel="canonical"[^>]*>/i,
       `<link rel="canonical" href="${canonical}">`
     )
     .replace(
-      /<meta property="og:title" content=".*?">/i,
+      /<meta\s+property="og:title"[^>]*>/i,
       `<meta property="og:title" content="${title}">`
     )
     .replace(
-      /<meta property="og:description" content=".*?">/i,
+      /<meta\s+property="og:description"[^>]*>/i,
       `<meta property="og:description" content="${description}">`
     )
     .replace(
-      /<meta property="og:url" content=".*?">/i,
+      /<meta\s+property="og:url"[^>]*>/i,
       `<meta property="og:url" content="${canonical}">`
     )
     .replace(
-      /<meta name="twitter:title" content=".*?">/i,
+      /<meta\s+name="twitter:title"[^>]*>/i,
       `<meta name="twitter:title" content="${title}">`
     )
     .replace(
-      /<meta name="twitter:description" content=".*?">/i,
+      /<meta\s+name="twitter:description"[^>]*>/i,
       `<meta name="twitter:description" content="${description}">`
     )
     .replace(
